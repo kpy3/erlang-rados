@@ -23,11 +23,10 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
   return 0;
 }
 
-static void unload(ErlNifEnv *env, void *priv_data) {
-  close_resources(env);
-}
+static void unload(ErlNifEnv *env, void *priv_data) { close_resources(env); }
 
 static ErlNifFunc nif_funcs[] = {
-    {"connect", 4, connect_to_cluster, ERL_NIF_DIRTY_JOB_IO_BOUND}};
+    {"connect", 4, connect_to_cluster, ERL_NIF_DIRTY_JOB_IO_BOUND},
+    {"close", 1, close_connection, ERL_NIF_DIRTY_JOB_IO_BOUND}};
 
 ERL_NIF_INIT(rados, nif_funcs, &load, NULL, NULL, &unload);

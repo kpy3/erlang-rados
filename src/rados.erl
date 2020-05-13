@@ -14,6 +14,7 @@
 -on_load(init/0).
 
 -export([connect/4]).
+-export([close/1]).
 
 -define(APPNAME, erl_rados).
 -define(LIBNAME, erl_rados).
@@ -22,7 +23,7 @@
 -type cluster() :: binary().
 -type user() :: binary().
 -type ceph_conf_file() :: file:filename().
--type pool_handler() :: term().
+-type connection() :: term().
 
 -type options() :: #{
     ceph_conf_file => ceph_conf_file(),
@@ -32,8 +33,12 @@
 %% API
 
 -spec connect(cluster(), pool(), user(), options()) ->
-    {ok, pool_handler()} | {error, Reason :: term()}.
+    {ok, connection()} | {error, Reason :: term()}.
 connect(_Cluster, _Pool, _User, _Options) ->
+    not_loaded(?LINE).
+
+-spec close(connection()) -> ok.
+close(_Connection) ->
     not_loaded(?LINE).
 
 init() ->

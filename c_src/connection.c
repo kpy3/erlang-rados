@@ -125,3 +125,26 @@ connect_to_cluster(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 
   return enif_make_tuple2(env, atom_ok, term);
 }
+
+ERL_NIF_TERM close_connection(ErlNifEnv *env, int argc,
+                              const ERL_NIF_TERM argv[]) {
+
+  connection_t *conn_res = NULL;
+
+  if (argc != 1) {
+    return enif_make_badarg(env);
+  }
+
+  if (!enif_get_resource(env, argv[0], connection_res, (void **)&conn_res)) {
+    return enif_make_badarg(env);
+  }
+  /* conn_res->cluster can be shutdown at this point by other process */
+  if (conn_res->cluster) {
+    rados_shutdown(*(conn_res->cluster));
+    free(conn_res->cluster);
+    conn_res->cluster = NULL;
+  }
+  enif_release_resource(conn_res);
+
+  return atom_ok;
+}

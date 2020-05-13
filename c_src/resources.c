@@ -39,8 +39,13 @@ void connection_dtor(ErlNifEnv *env, void *obj) {
   //           leaks. */ rados_aio_release(f->comp);
   //      }
   //      rados_ioctx_destroy(f->io);
-  rados_shutdown(*(conn_res->cluster));
-  free(conn_res->cluster);
+
+  /* conn_res->cluster can be shutdown at this point by other process */
+  if (conn_res->cluster) {
+    rados_shutdown(*(conn_res->cluster));
+    free(conn_res->cluster);
+    conn_res->cluster = NULL;
+  }
 }
 
 int open_resources(ErlNifEnv *env) {
