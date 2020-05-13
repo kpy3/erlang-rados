@@ -12,57 +12,44 @@
 
 #include "resources.h"
 
-ErlNifResourceType* connection_res;
+ErlNifResourceType *connection_res;
 
-static
-ErlNifResourceType*
-open_resource(ErlNifEnv *env, const char *name, ErlNifResourceDtor *dtor)
-{
-    ErlNifResourceType *res;
-    res = enif_open_resource_type(
-        env,
-        NULL,
-        name,
-        dtor,
-        ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER,
-        NULL
-    );
+static ErlNifResourceType *open_resource(ErlNifEnv *env, const char *name,
+                                         ErlNifResourceDtor *dtor) {
+  ErlNifResourceType *res;
+  res = enif_open_resource_type(env, NULL, name, dtor,
+                                ERL_NIF_RT_CREATE | ERL_NIF_RT_TAKEOVER, NULL);
 
-    if(!res) {
-        enif_fprintf(stderr, "cannot open resource '%s'", name);
-        return NULL;
-    }
+  if (!res) {
+    enif_fprintf(stderr, "cannot open resource '%s'", name);
+    return NULL;
+  }
 
-    return res;
+  return res;
 }
 
-void
-connection_dtor(ErlNifEnv* env, void* obj)
-{
-//    connection_t* f = (cluster_t*) obj;
-    // TODO Release resources here
-//    if(f->is_async)
-//    {
-//         /* Wait for the operation to complete */
-//         rados_aio_wait_for_complete(f->comp);
-//         /* Release the asynchronous I/O complete handle to avoid memory leaks. */
-//         rados_aio_release(f->comp);
-//    }
-//    rados_ioctx_destroy(f->io);
-//    rados_shutdown(f->cluster);
+void connection_dtor(ErlNifEnv *env, void *obj) {
+  //    connection_t* f = (cluster_t*) obj;
+  // TODO Release resources here
+  //    if(f->is_async)
+  //    {
+  //         /* Wait for the operation to complete */
+  //         rados_aio_wait_for_complete(f->comp);
+  //         /* Release the asynchronous I/O complete handle to avoid memory
+  //         leaks. */ rados_aio_release(f->comp);
+  //    }
+  //    rados_ioctx_destroy(f->io);
+  //    rados_shutdown(f->cluster);
 }
 
-int
-open_resources(ErlNifEnv *env)
-{
-    connection_res = open_resource(env, "rados_connection", connection_dtor);
-    if(!connection_res) {
-        return -1;
-    }
-    return 0;
+int open_resources(ErlNifEnv *env) {
+  connection_res = open_resource(env, "rados_connection", connection_dtor);
+  if (!connection_res) {
+    return -1;
+  }
+  return 0;
 }
 
-void close_resources(ErlNifEnv* env)
-{
-    // TODO Do we need it?
+void close_resources(ErlNifEnv *env) {
+  // TODO Do we need it?
 }

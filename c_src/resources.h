@@ -13,23 +13,22 @@
 #ifndef _RADOS_NIF_RESOURCES_H_
 #define _RADOS_NIF_RESOURCES_H_
 
-#include "stdbool.h"
 #include "erl_nif.h"
+#include "stdbool.h"
 //#include "rados/librados.h"
 
-extern ErlNifResourceType* connection_res;
+extern ErlNifResourceType *connection_res;
 
-typedef struct
-{
-    bool is_async;
-//    rados_t cluster;
-//    rados_ioctx_t io;
-//    rados_completion_t comp;
-}connection_t;
+typedef struct {
+  bool is_async;
+  //    rados_t cluster;
+  //    rados_ioctx_t io;
+  //    rados_completion_t comp;
+} connection_t;
 
-int open_resources(ErlNifEnv* env);
-void close_resources(ErlNifEnv* env);
+int open_resources(ErlNifEnv *env);
+void close_resources(ErlNifEnv *env);
 
-void connection_dtor(ErlNifEnv* env, void* obj);
+void connection_dtor(ErlNifEnv *env, void *obj);
 
 #endif

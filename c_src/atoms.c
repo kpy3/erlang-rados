@@ -18,28 +18,22 @@ ERL_NIF_TERM atom_ok;
 ERL_NIF_TERM atom_error;
 
 ERL_NIF_TERM
-mk_atom(ErlNifEnv* env, const char* atom)
-{
-    ERL_NIF_TERM ret;
-    if(!enif_make_existing_atom(env, atom, &ret, ERL_NIF_LATIN1))
-    {
-        return enif_make_atom(env, atom);
-    }
-    return ret;
+mk_atom(ErlNifEnv *env, const char *atom) {
+  ERL_NIF_TERM ret;
+  if (!enif_make_existing_atom(env, atom, &ret, ERL_NIF_LATIN1)) {
+    return enif_make_atom(env, atom);
+  }
+  return ret;
 }
 
 ERL_NIF_TERM
-mk_error(ErlNifEnv* env, const char* mesg)
-{
-    return enif_make_tuple2(env, atom_error, mk_atom(env, mesg));
+mk_error(ErlNifEnv *env, const char *mesg) {
+  return enif_make_tuple2(env, atom_error, mk_atom(env, mesg));
 }
 
-
-void
-init_atoms(ErlNifEnv* env)
-{
-    atom_ok        = mk_atom(env, "ok");
-    atom_error     = mk_atom(env, "error");
-    atom_true      = mk_atom(env, "true");
-    atom_false     = mk_atom(env, "false");
+void init_atoms(ErlNifEnv *env) {
+  atom_ok = mk_atom(env, "ok");
+  atom_error = mk_atom(env, "error");
+  atom_true = mk_atom(env, "true");
+  atom_false = mk_atom(env, "false");
 }

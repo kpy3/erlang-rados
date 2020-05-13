@@ -20,8 +20,8 @@ extern ERL_NIF_TERM atom_false;
 extern ERL_NIF_TERM atom_ok;
 extern ERL_NIF_TERM atom_error;
 
-void init_atoms(ErlNifEnv* env);
-ERL_NIF_TERM mk_atom(ErlNifEnv* env, const char* atom);
-ERL_NIF_TERM mk_error(ErlNifEnv* env, const char* mesg);
+void init_atoms(ErlNifEnv *env);
+ERL_NIF_TERM mk_atom(ErlNifEnv *env, const char *atom);
+ERL_NIF_TERM mk_error(ErlNifEnv *env, const char *mesg);
 
 #endif
