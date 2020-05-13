@@ -25,7 +25,6 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
 
 static void unload(ErlNifEnv *env, void *priv_data) {
   close_resources(env);
-  enif_fprintf(stdout, "unload exit\n");
 }
 
 static ErlNifFunc nif_funcs[] = {
