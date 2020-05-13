@@ -1,5 +1,5 @@
 {application, rados,
- [{description, "An OTP library"},
+ [{description, "Ceph RADOS client library"},
   {vsn, "0.1.0"},
   {registered, []},
   {applications,
