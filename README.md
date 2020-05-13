@@ -31,6 +31,6 @@ from project root, then login to box with
 
     $ vagrant ssh
 
-and change directory to /vagrant, thens run
+and change directory to /vagrant, then run
 
     $ rebar3 compile
