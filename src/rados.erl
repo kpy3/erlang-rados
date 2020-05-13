@@ -13,7 +13,7 @@
 -module(rados).
 -on_load(init/0).
 
--export([connect/3]).
+-export([connect/4]).
 
 -define(APPNAME, erl_rados).
 -define(LIBNAME, erl_rados).
@@ -26,15 +26,14 @@
 
 -type options() :: #{
     ceph_conf_file => ceph_conf_file(),
-    create_pool_if_not_existed => boolean(),
-    user => user()
+    create_pool_if_not_existed => boolean()
 }.
 
 %% API
 
--spec connect(cluster(), pool(), options()) ->
+-spec connect(cluster(), pool(), user(), options()) ->
     {ok, pool_handler()} | {error, Reason :: term()}.
-connect(_Cluster, _Pool, _Options) ->
+connect(_Cluster, _Pool, _User, _Options) ->
     not_loaded(?LINE).
 
 init() ->

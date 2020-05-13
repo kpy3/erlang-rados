@@ -14,14 +14,14 @@
 #define _RADOS_NIF_RESOURCES_H_
 
 #include "erl_nif.h"
+#include "rados/librados.h"
 #include "stdbool.h"
-//#include "rados/librados.h"
 
 extern ErlNifResourceType *connection_res;
 
 typedef struct {
   bool is_async;
-  //    rados_t cluster;
+  rados_t *cluster;
   //    rados_ioctx_t io;
   //    rados_completion_t comp;
 } connection_t;

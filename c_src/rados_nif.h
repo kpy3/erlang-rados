@@ -14,6 +14,5 @@
 #define _RADOS_NIF_H_
 
 #include "erl_nif.h"
-//#include "rados/librados.h"
 
 #endif

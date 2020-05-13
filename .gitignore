@@ -1,0 +1,8 @@
+_build
+.vagrant
+tmp
+*.iml
+*.vdi
+*.log
+c_src/*.o
+priv/*.so

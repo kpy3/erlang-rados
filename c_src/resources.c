@@ -29,17 +29,18 @@ static ErlNifResourceType *open_resource(ErlNifEnv *env, const char *name,
 }
 
 void connection_dtor(ErlNifEnv *env, void *obj) {
-  //    connection_t* f = (cluster_t*) obj;
-  // TODO Release resources here
-  //    if(f->is_async)
-  //    {
-  //         /* Wait for the operation to complete */
-  //         rados_aio_wait_for_complete(f->comp);
-  //         /* Release the asynchronous I/O complete handle to avoid memory
-  //         leaks. */ rados_aio_release(f->comp);
-  //    }
-  //    rados_ioctx_destroy(f->io);
-  //    rados_shutdown(f->cluster);
+  connection_t *conn_res = (connection_t *)obj;
+  //   TODO Release resources here
+  //      if(f->is_async)
+  //      {
+  //           /* Wait for the operation to complete */
+  //           rados_aio_wait_for_complete(f->comp);
+  //           /* Release the asynchronous I/O complete handle to avoid memory
+  //           leaks. */ rados_aio_release(f->comp);
+  //      }
+  //      rados_ioctx_destroy(f->io);
+  rados_shutdown(*(conn_res->cluster));
+  free(conn_res->cluster);
 }
 
 int open_resources(ErlNifEnv *env) {

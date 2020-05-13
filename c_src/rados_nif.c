@@ -12,7 +12,7 @@
 
 #include "rados_nif.h"
 #include "atoms.h"
-#include "cluster.h"
+#include "connection.h"
 #include "resources.h"
 
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
@@ -23,9 +23,12 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info) {
   return 0;
 }
 
-static void unload(ErlNifEnv *env, void *priv_data) { close_resources(env); }
+static void unload(ErlNifEnv *env, void *priv_data) {
+  close_resources(env);
+  enif_fprintf(stdout, "unload exit\n");
+}
 
 static ErlNifFunc nif_funcs[] = {
-    {"connect", 3, connect_to_cluster, ERL_NIF_DIRTY_JOB_IO_BOUND}};
+    {"connect", 4, connect_to_cluster, ERL_NIF_DIRTY_JOB_IO_BOUND}};
 
 ERL_NIF_INIT(rados, nif_funcs, &load, NULL, NULL, &unload);
