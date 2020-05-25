@@ -16,10 +16,14 @@
 #include "resources.h"
 #include <string.h>
 
+static
+void
+free_buffer(char **buf) { free(*buf); }
+
 ERL_NIF_TERM
 connect_to_cluster(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   ErlNifBinary cluster_name_bin, pool_name_bin, user_name_bin;
-  char *cluster_name, *pool_name, *user_name;
+  __attribute__((cleanup(free_buffer))) char *cluster_name, *pool_name, *user_name;
   cluster_name = NULL;
   pool_name = NULL;
   user_name = NULL;
@@ -58,7 +62,6 @@ connect_to_cluster(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 
   if (enif_inspect_binary(env, argv[1], &pool_name_bin)) {
     if (!pool_name_bin.size || pool_name_bin.data == NULL) {
-      free(cluster_name);
       return enif_make_badarg(env);
     } else {
       pool_name = (char *)malloc(pool_name_bin.size + 1);
@@ -66,14 +69,11 @@ connect_to_cluster(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
       *(pool_name + pool_name_bin.size) = '\0';
     }
   } else {
-    free(cluster_name);
     return enif_make_badarg(env);
   }
 
   if (enif_inspect_binary(env, argv[2], &user_name_bin)) {
     if (!user_name_bin.size || user_name_bin.data == NULL) {
-      free(cluster_name);
-      free(pool_name);
       return enif_make_badarg(env);
     } else {
       user_name = (char *)malloc(user_name_bin.size + 1);
@@ -81,8 +81,6 @@ connect_to_cluster(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
       *(user_name + user_name_bin.size) = '\0';
     }
   } else {
-    free(cluster_name);
-    free(pool_name);
     return enif_make_badarg(env);
   }
 
@@ -102,9 +100,6 @@ connect_to_cluster(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   cluster = (rados_t *)malloc(sizeof(rados_t));
   err = rados_create2(cluster, cluster_name, user_name, flags);
   if (err < 0) {
-    free(cluster_name);
-    free(pool_name);
-    free(user_name);
     free(cluster);
     //       enif_fprintf(stderr, "Couldn't create the cluster handle: %s\n",
     //       strerror(-err));
@@ -119,9 +114,6 @@ connect_to_cluster(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 
   ERL_NIF_TERM term = enif_make_resource(env, conn_res);
   enif_release_resource(conn_res);
-  free(cluster_name);
-  free(pool_name);
-  free(user_name);
 
   return enif_make_tuple2(env, atom_ok, term);
 }
