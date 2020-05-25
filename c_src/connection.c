@@ -16,14 +16,13 @@
 #include "resources.h"
 #include <string.h>
 
-static
-void
-free_buffer(char **buf) { free(*buf); }
+static void free_buffer(char **buf) { free(*buf); }
 
 ERL_NIF_TERM
 connect_to_cluster(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
   ErlNifBinary cluster_name_bin, pool_name_bin, user_name_bin;
-  __attribute__((cleanup(free_buffer))) char *cluster_name, *pool_name, *user_name;
+  __attribute__((cleanup(free_buffer))) char *cluster_name, *pool_name,
+      *user_name;
   cluster_name = NULL;
   pool_name = NULL;
   user_name = NULL;
