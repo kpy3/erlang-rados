@@ -96,10 +96,10 @@ connect_to_cluster(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
 
   /* Initialize the cluster handle  */
   int err;
-  cluster = (rados_t *)malloc(sizeof(rados_t));
+  cluster = (rados_t *)enif_alloc(sizeof(rados_t));
   err = rados_create2(cluster, cluster_name, user_name, flags);
   if (err < 0) {
-    free(cluster);
+    enif_free(cluster);
     //       enif_fprintf(stderr, "Couldn't create the cluster handle: %s\n",
     //       strerror(-err));
     return enif_make_badarg(env);
@@ -132,7 +132,7 @@ ERL_NIF_TERM close_connection(ErlNifEnv *env, int argc,
   /* conn_res->cluster can be shutdown at this point by other process */
   if (conn_res->cluster) {
     rados_shutdown(*(conn_res->cluster));
-    free(conn_res->cluster);
+    enif_free(conn_res->cluster);
     conn_res->cluster = NULL;
   }
   enif_release_resource(conn_res);

@@ -43,7 +43,7 @@ void connection_dtor(ErlNifEnv *env, void *obj) {
   /* conn_res->cluster can be shutdown at this point by other process */
   if (conn_res->cluster) {
     rados_shutdown(*(conn_res->cluster));
-    free(conn_res->cluster);
+    enif_free(conn_res->cluster);
     conn_res->cluster = NULL;
   }
 }
