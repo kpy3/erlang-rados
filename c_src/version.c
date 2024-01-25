@@ -10,25 +10,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef _RADOS_NIF_RESOURCES_H_
-#define _RADOS_NIF_RESOURCES_H_
+#include "rados_nif.h"
 
-#include "erl_nif.h"
-#include "rados/librados.h"
-#include "stdbool.h"
+ERL_NIF_TERM
+erlang_rados_version(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+  int major, minor, extra;
 
-extern ErlNifResourceType *connection_res;
+  rados_version(&major, &minor, &extra);
 
-typedef struct {
-  bool is_async;
-  rados_t *cluster;
-  //    rados_ioctx_t io;
-  //    rados_completion_t comp;
-} connection_t;
+  ERL_NIF_TERM term =
+      enif_make_tuple3(env, enif_make_int(env, major),
+                       enif_make_int(env, minor), enif_make_int(env, extra));
 
-int open_resources(ErlNifEnv *env);
-void close_resources(ErlNifEnv *env);
-
-void connection_dtor(ErlNifEnv *env, void *obj);
-
-#endif
+  return term;
+}

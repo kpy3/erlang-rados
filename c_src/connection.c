@@ -10,132 +10,77 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "connection.h"
-#include "atoms.h"
-#include "rados/librados.h"
-#include "resources.h"
+#include "rados_nif.h"
 #include <string.h>
 
-static void free_buffer(char **buf) { free(*buf); }
-
 ERL_NIF_TERM
-connect_to_cluster(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
-  ErlNifBinary cluster_name_bin, pool_name_bin, user_name_bin;
-  __attribute__((cleanup(free_buffer))) char *cluster_name, *pool_name,
-      *user_name;
-  cluster_name = NULL;
-  pool_name = NULL;
-  user_name = NULL;
+erlang_rados_connect(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]) {
+  ErlNifBinary user_name_bin;
+  char *user_name;
+  connection_t *connection;
+  rados_t cluster;
+  int err;
 
-  if (argc != 4) {
+  if (!enif_inspect_binary(env, argv[0], &user_name_bin)) {
     return enif_make_badarg(env);
   }
 
-  if (!enif_is_binary(env, argv[0])) {
-    return enif_make_badarg(env);
-  }
-
-  if (!enif_is_binary(env, argv[1])) {
-    return enif_make_badarg(env);
-  }
-
-  if (!enif_is_binary(env, argv[2])) {
-    return enif_make_badarg(env);
-  }
-
-  if (!enif_is_map(env, argv[3])) {
-    return enif_make_badarg(env);
-  }
-
-  if (enif_inspect_binary(env, argv[0], &cluster_name_bin)) {
-    if (!cluster_name_bin.size || cluster_name_bin.data == NULL) {
-      return enif_make_badarg(env);
-    } else {
-      cluster_name = (char *)malloc(cluster_name_bin.size + 1);
-      memcpy(cluster_name, cluster_name_bin.data, cluster_name_bin.size);
-      *(cluster_name + cluster_name_bin.size) = '\0';
-    }
-  } else {
-    return enif_make_badarg(env);
-  }
-
-  if (enif_inspect_binary(env, argv[1], &pool_name_bin)) {
-    if (!pool_name_bin.size || pool_name_bin.data == NULL) {
-      return enif_make_badarg(env);
-    } else {
-      pool_name = (char *)malloc(pool_name_bin.size + 1);
-      memcpy(pool_name, pool_name_bin.data, pool_name_bin.size);
-      *(pool_name + pool_name_bin.size) = '\0';
-    }
-  } else {
-    return enif_make_badarg(env);
-  }
-
-  if (enif_inspect_binary(env, argv[2], &user_name_bin)) {
-    if (!user_name_bin.size || user_name_bin.data == NULL) {
-      return enif_make_badarg(env);
-    } else {
-      user_name = (char *)malloc(user_name_bin.size + 1);
-      memcpy(user_name, user_name_bin.data, user_name_bin.size);
-      *(user_name + user_name_bin.size) = '\0';
-    }
-  } else {
-    return enif_make_badarg(env);
-  }
-
-  //  enif_fprintf(stdout, "cluster '%s', pool '%s', user '%s'\n", cluster_name,
-  //  pool_name, user_name);
-
-  connection_t *conn_res =
-      enif_alloc_resource(connection_res, sizeof(connection_t));
-
-  // TODO Init connection: set async, cluster, io, completion, etc
-
-  rados_t *cluster = NULL;
-  uint64_t flags = 0;
+  user_name = (char *)enif_alloc(user_name_bin.size + 1);
+  memcpy(user_name, user_name_bin.data, user_name_bin.size);
+  user_name[user_name_bin.size] = 0;
 
   /* Initialize the cluster handle  */
-  int err;
-  cluster = (rados_t *)enif_alloc(sizeof(rados_t));
-  err = rados_create2(cluster, cluster_name, user_name, flags);
+  err = rados_create(&cluster, user_name);
+  enif_free(user_name);
+
+  err = rados_conf_read_file(cluster,
+                             "/var/snap/microceph/current/conf/ceph.conf");
   if (err < 0) {
-    enif_free(cluster);
-    //       enif_fprintf(stderr, "Couldn't create the cluster handle: %s\n",
-    //       strerror(-err));
+    enif_fprintf(stderr, "Couldn't read ceph.conf file: %s\n", strerror(-err));
     return enif_make_badarg(env);
   }
 
-  conn_res->cluster = cluster;
+  err = rados_connect(cluster);
+  if (err < 0) {
+    enif_fprintf(stderr, "Couldn't connect to cluster handle: %s\n",
+                 strerror(-err));
+    return enif_make_badarg(env);
+  }
 
-  //       enif_fprintf(stdout, "conn_res->cluster = %p\n", conn_res->cluster);
+  connection = enif_alloc_resource(rados_connection, sizeof(connection_t));
+  connection->cluster = cluster;
+  connection->mutex = enif_mutex_create("rados_connection");
 
-  // TODO Init connection: set async, cluster, io, completion, etc
-
-  ERL_NIF_TERM term = enif_make_resource(env, conn_res);
-  enif_release_resource(conn_res);
+  ERL_NIF_TERM term = enif_make_resource(env, connection);
+  enif_release_resource(connection);
 
   return enif_make_tuple2(env, atom_ok, term);
 }
 
-ERL_NIF_TERM close_connection(ErlNifEnv *env, int argc,
-                              const ERL_NIF_TERM argv[]) {
+ERL_NIF_TERM erlang_rados_shutdown(ErlNifEnv *env, int argc,
+                                 const ERL_NIF_TERM argv[]) {
 
-  connection_t *conn_res = NULL;
+  connection_t *connection;
 
   if (argc != 1) {
     return enif_make_badarg(env);
   }
 
-  if (!enif_get_resource(env, argv[0], connection_res, (void **)&conn_res)) {
+  if (!enif_get_resource(env, argv[0], rados_connection, (void **)&connection)) {
     return enif_make_badarg(env);
   }
-  /* conn_res->cluster can be shutdown at this point by other process */
-  if (conn_res->cluster) {
-    rados_shutdown(*(conn_res->cluster));
-    enif_free(conn_res->cluster);
-    conn_res->cluster = NULL;
+
+  enif_mutex_lock(connection->mutex);
+  if (connection->cluster) {
+    rados_shutdown(connection->cluster);
+    connection->cluster = NULL;
   }
-  enif_release_resource(conn_res);
+  enif_mutex_unlock(connection->mutex);
+  if (connection->mutex) {
+    enif_mutex_destroy(connection->mutex);
+    connection->mutex = NULL;
+  }
+  enif_release_resource(connection);
 
   return atom_ok;
 }

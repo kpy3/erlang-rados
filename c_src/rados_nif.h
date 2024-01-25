@@ -14,5 +14,25 @@
 #define _RADOS_NIF_H_
 
 #include "erl_nif.h"
+#include "rados/librados.h"
+
+extern ERL_NIF_TERM atom_ok;
+extern ERL_NIF_TERM atom_error;
+
+extern ErlNifResourceType *rados_connection;
+
+typedef struct {
+  ErlNifMutex *mutex; /* used to protect the entire structure from concurrent access */
+  rados_t cluster;    /* RADOS handler */
+} connection_t;
+
+ERL_NIF_TERM erlang_rados_connect(ErlNifEnv *env, int argc,
+                                  const ERL_NIF_TERM argv[]);
+
+ERL_NIF_TERM erlang_rados_shutdown(ErlNifEnv *env, int argc,
+                                 const ERL_NIF_TERM argv[]);
+
+ERL_NIF_TERM erlang_rados_version(ErlNifEnv *env, int argc,
+                                  const ERL_NIF_TERM argv[]);
 
 #endif

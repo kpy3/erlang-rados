@@ -16,5 +16,12 @@
 -include_lib("eunit/include/eunit.hrl").
 
 simple_test() ->
-    {ok, Ref} = rados:connect(<<"ceph">>, <<"test">>, <<"client.admin">>, #{}),
-    ok = rados:close(Ref).
+    % {ok, Ref} = rados:connect(<<"ceph">>, <<"test">>, <<"client.admin">>, #{}),
+    erlang:display(rados:version()),
+    {ok, Ref} = rados:connect(<<"test">>),
+    ok = rados:shutdown(Ref).
+
+simple_connect_test() ->
+    rados:connect(<<"test">>),
+    rados:connect(<<"test">>),
+    rados:connect(<<"test">>).

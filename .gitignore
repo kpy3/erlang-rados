@@ -1,8 +1,12 @@
 _build
 .vagrant
+.vscode
+.idea
+doc
 tmp
 *.iml
 *.vdi
 *.log
 c_src/*.o
 priv/*.so
+examples
